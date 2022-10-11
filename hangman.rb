@@ -9,6 +9,8 @@ puts secretWord
 board =  ["_"] * secretWord.size
 puts board.join(" ")
 
+guessedWords = []
+
 while lives > 0 && board.include?("_")
   puts "Please guess a letter:"
   guess = gets.chomp.upcase
@@ -26,8 +28,12 @@ while lives > 0 && board.include?("_")
     puts "The word did not include #{guess}"
   end
 
+  guessedWords.push(guess)
+  puts "You guessed: #{guessedWords.join(", ")}"
+
   p board.join(" ")
 end
+
 
 if board.join("") == secretWord
   puts "You won"
