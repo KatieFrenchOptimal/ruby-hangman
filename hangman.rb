@@ -1,39 +1,41 @@
 #!/usr/bin/env ruby
 
-gameInProgress = true
+# to do:
+# validate letters only
+# do not accept repeated letters
+# live/lives if more than 1
 
+gameInProgress = true
 lives = 9
+guessedWords = []
 
 secretWord = File.readlines("words.txt").sample.upcase.chop
-puts secretWord
 board =  ["_"] * secretWord.size
 puts board.join(" ")
 
-guessedWords = []
-
 while lives > 0 && board.include?("_")
-  puts "Please guess a letter:"
+  puts "Guess a letter:"
   guess = gets.chomp.upcase
-  puts "You guessed: '#{guess}'"
-  puts "You have #{lives} remaining lives left."
 
   if secretWord.include?(guess)
+    puts "Correct guess. The letter #{guess} is in the word. You have #{lives} remaining lives left"
+
     secretWord.chars.each_with_index do |character, index|
-      if character == guess
-        board[index] = character
-      end
+      next board[index] = character if character == guess
     end
-  else
-    lives -= 1
-    puts "The word did not include #{guess}"
+  end
+
+  lives -= 1
+
+  if lives > 0
+    puts "The word did not include #{guess}. You have #{lives} remaining lives left"
   end
 
   guessedWords.push(guess)
-  puts "You guessed: #{guessedWords.join(", ")}"
+  puts "You have guessed: #{guessedWords.join(", ")}"
 
   p board.join(" ")
 end
-
 
 if board.join("") == secretWord
   puts "You won"
