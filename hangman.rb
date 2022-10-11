@@ -1,46 +1,54 @@
 #!/usr/bin/env ruby
 
-# to do:
-# validate letters only
-# do not accept repeated letters
-# live/lives if more than 1
-
-gameInProgress = true
 lives = 9
-guessedWords = []
-
-secretWord = File.readlines("words.txt").sample.upcase.chop
-board =  ["_"] * secretWord.size
-puts board.join(" ")
+guessed_letters = []
+secret_word = File.readlines("words.txt").sample.upcase.chop
+board =  ["_"] * secret_word.size
 
 while lives > 0 && board.include?("_")
-  puts "Guess a letter:"
+  puts "Try to guess this hidden word: #{board.join(" ")}"
+  print "Guess a letter: "
+
   guess = gets.chomp.upcase
 
-  if secretWord.include?(guess)
-    puts "Correct guess. The letter #{guess} is in the word. You have #{lives} remaining lives left"
+  if guessed_letters.include?(guess)
+    puts "------------------------------------------------------------------------"
+    puts "You have already guessed this letter - try again."
+    puts "------------------------------------------------------------------------"
+    next
+  end
 
-    secretWord.chars.each_with_index do |character, index|
-      next board[index] = character if character == guess
+  unless guess =~ /^[a-zA-Z]$/
+    puts "------------------------------------------------------------------------"
+    puts "Input is invalid - please provide a letter."
+    puts "------------------------------------------------------------------------"
+    next
+  end
+
+  if secret_word.include?(guess)
+    puts "------------------------------------------------------------------------"
+    puts "Correct guess. The letter #{guess} is in the word."
+    puts "You have #{lives > 1 ? 'lives' : 'life'} remaining lives left."
+
+    secret_word.chars.each_with_index do |character, index|
+      board[index] = character if character == guess
     end
+  else
+    lives -= 1
+    puts "------------------------------------------------------------------------"
+    puts "The secret word does not include the letter '#{guess}'."
+    puts "You have #{lives} remaining #{lives > 1 ? 'lives' : 'life'} left." if lives > 0
   end
 
-  lives -= 1
-
-  if lives > 0
-    puts "The word did not include #{guess}. You have #{lives} remaining lives left"
-  end
-
-  guessedWords.push(guess)
-  puts "You have guessed: #{guessedWords.join(", ")}"
-
-  p board.join(" ")
+  guessed_letters.push(guess)
+  puts "Your guesses: '#{guessed_letters.join("', '")}'"
 end
 
-if board.join("") == secretWord
-  puts "You won"
+if board.join("") == secret_word
+  puts "You won."
+  puts "------------------------------------------------------------------------"
 elsif lives <= 0
-  puts "You lost. The word was: #{secretWord}"
+  puts "You lost."
+  puts "The secret word was: #{secret_word}."
+  puts "------------------------------------------------------------------------"
 end
-
-puts "The word was #{secretWord}"
