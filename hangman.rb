@@ -94,6 +94,3 @@ class Hangman
     end
   end
 end
-
-game = Hangman.new
-game.start
