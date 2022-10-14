@@ -1,14 +1,19 @@
 #!/usr/bin/env ruby
 
+require "./game_view"
+
 class Hangman
   attr_reader :lives
   attr_reader :secret_word
   attr_reader :board
   attr_reader :guessed_letters
 
-  def initialize
+  def initialize(input: $stdin, output: $stdout, secret_word: nil)
+    @gameview = Gameview.new(output)
+    @output = output
+    @input = input
     @lives = 9
-    @secret_word = File.readlines("words.txt").sample.upcase.chop
+    @secret_word = secret_word.upcase || File.readlines("words.txt").sample.upcase.chop
     @board = setup_board
     @guessed_letters = []
   end
@@ -19,19 +24,16 @@ class Hangman
 
   def start
     while lives > 0 && !won?
-      puts board_state
+      @output.puts board_state
       guess = make_guess
       valid_guess(guess)
       show_past_guesses
     end
 
     if won?
-      puts "You won."
-      puts "------------------------------------------------------------------------"
+      @gameview.won
     else
-      puts "You lost."
-      puts "The secret word was: #{secret_word}."
-      puts "------------------------------------------------------------------------"
+      @gameview.lost(secret_word)
     end
   end
 
@@ -44,15 +46,15 @@ class Hangman
   end
 
   def make_guess
-    print "Guess a letter: "
-    gets.chomp.upcase
+    @output.print "Guess a letter: "
+    @input.gets.chomp.upcase
   end
 
   def valid_guess(guess)
     unless guess =~ /^[a-zA-Z]$/
-      puts "------------------------------------------------------------------------"
-      puts "Input is invalid - please provide a letter."
-      puts "------------------------------------------------------------------------"
+      @output.puts "------------------------------------------------------------------------"
+      @output.puts "Input is invalid - please provide a letter."
+      @output.puts "------------------------------------------------------------------------"
     else
       save_guess(guess)
     end
@@ -60,9 +62,9 @@ class Hangman
 
   def save_guess(guess)
     if guessed_letters.include?(guess)
-      puts "------------------------------------------------------------------------"
-      puts "You have already guessed this letter - try again."
-      puts "------------------------------------------------------------------------"
+      @output.puts "------------------------------------------------------------------------"
+      @output.puts "You have already guessed this letter - try again."
+      @output.puts "------------------------------------------------------------------------"
     else
       @guessed_letters.push(guess)
       update_board(guess)
@@ -70,27 +72,27 @@ class Hangman
   end
 
   def show_past_guesses
-    puts "Your guesses: '#{guessed_letters.join("', '")}'"
+    @output.puts "Your guesses: '#{guessed_letters.join("', '")}'"
   end
 
   def board_state
-    puts "Guess the hidden word: #{board.join(" ")}"
+    @output.puts "Guess the hidden word: #{board.join(" ")}"
   end
 
   def update_board(guess)
     if secret_word.include?(guess)
-      puts "------------------------------------------------------------------------"
-      puts "Correct guess. The letter #{guess} is in the word."
-      puts "You have #{lives} remaining #{lives > 1 ? 'lives' : 'life'} left."
+      @output.puts "------------------------------------------------------------------------"
+      @output.puts "Correct guess. The letter #{guess} is in the word."
+      @output.puts "You have #{lives} remaining #{lives > 1 ? 'lives' : 'life'} left."
 
       secret_word.chars.each_with_index do |character, index|
         board[index] = character if character == guess
       end
     else
       @lives -= 1
-      puts "------------------------------------------------------------------------"
-      puts "The secret word does not include the letter '#{guess}'."
-      puts "You have #{lives} remaining #{lives > 1 ? 'lives' : 'life'} left." if lives > 0
+      @output.puts "------------------------------------------------------------------------"
+      @output.puts "The secret word does not include the letter '#{guess}'."
+      @output.puts "You have #{lives} remaining #{lives > 1 ? 'lives' : 'life'} left." if lives > 0
     end
   end
 end
