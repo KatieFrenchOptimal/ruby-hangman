@@ -13,7 +13,7 @@ class Hangman
     @output = output
     @input = input
     @lives = 9
-    @secret_word = secret_word.upcase || File.readlines("words.txt").sample.upcase.chop
+    @secret_word = secret_word || File.readlines("words.txt").sample.upcase.chop
     @board = setup_board
     @guessed_letters = []
   end
@@ -26,12 +26,18 @@ class Hangman
     while lives > 0 && !won?
       @output.puts board_state
       guess = make_guess
-      valid_guess(guess)
-      show_past_guesses
+
+      unless valid_guess(guess)
+        @gameview.invalid_guess
+      else
+        save_guess(guess)
+      end
+
+      @gameview.past_guesses(guessed_letters)
     end
 
     if won?
-      @gameview.won
+      @gameview.won(secret_word)
     else
       @gameview.lost(secret_word)
     end
@@ -51,28 +57,16 @@ class Hangman
   end
 
   def valid_guess(guess)
-    unless guess =~ /^[a-zA-Z]$/
-      @output.puts "------------------------------------------------------------------------"
-      @output.puts "Input is invalid - please provide a letter."
-      @output.puts "------------------------------------------------------------------------"
-    else
-      save_guess(guess)
-    end
+    guess =~ /^[a-zA-Z]$/
   end
 
   def save_guess(guess)
     if guessed_letters.include?(guess)
-      @output.puts "------------------------------------------------------------------------"
-      @output.puts "You have already guessed this letter - try again."
-      @output.puts "------------------------------------------------------------------------"
+      @gameview.repeated_guess
     else
       @guessed_letters.push(guess)
       update_board(guess)
     end
-  end
-
-  def show_past_guesses
-    @output.puts "Your guesses: '#{guessed_letters.join("', '")}'"
   end
 
   def board_state
@@ -81,18 +75,14 @@ class Hangman
 
   def update_board(guess)
     if secret_word.include?(guess)
-      @output.puts "------------------------------------------------------------------------"
-      @output.puts "Correct guess. The letter #{guess} is in the word."
-      @output.puts "You have #{lives} remaining #{lives > 1 ? 'lives' : 'life'} left."
+      @gameview.correct_guess(guess, lives)
 
       secret_word.chars.each_with_index do |character, index|
         board[index] = character if character == guess
       end
     else
       @lives -= 1
-      @output.puts "------------------------------------------------------------------------"
-      @output.puts "The secret word does not include the letter '#{guess}'."
-      @output.puts "You have #{lives} remaining #{lives > 1 ? 'lives' : 'life'} left." if lives > 0
+      @gameview.incorrect_guess(guess, lives)
     end
   end
 end
