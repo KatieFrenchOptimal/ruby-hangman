@@ -15,48 +15,48 @@ class GameView
         break
       end
 
-      invalid_guess
+      invalid_guess_message
     end
 
     guess
   end
 
-  def board_state(board, guessed_letters)
+  def show_board_state(board, guessed_letters)
     @output.puts "Guess the hidden word: #{board.map{ |char| char.nil? ? '_' : char }.join(" ")}"
     @output.puts "Your guesses: '#{guessed_letters.join("', '")}'"
   end
 
-  def won(secret_word)
+  def won_message(secret_word)
     @output.puts "You won."
     @output.puts "The secret word was: #{secret_word}."
     @output.puts "------------------------------------------------------------------------"
   end
 
-  def lost(secret_word)
+  def lost_message(secret_word)
     @output.puts "You lost."
     @output.puts "The secret word was: #{secret_word}."
     @output.puts "------------------------------------------------------------------------"
   end
 
-  def invalid_guess
+  def invalid_guess_message
     @output.puts "------------------------------------------------------------------------"
     @output.puts "Input is invalid - please provide a letter."
     @output.puts "------------------------------------------------------------------------"
   end
 
-  def repeated_guess
+  def repeated_guess_message
     @output.puts "------------------------------------------------------------------------"
     @output.puts "You have already guessed this letter - try again."
     @output.puts "------------------------------------------------------------------------"
   end
 
-  def correct_guess(guess, lives)
+  def correct_guess_message(guess, lives)
     @output.puts "------------------------------------------------------------------------"
     @output.puts "Correct guess. The letter '#{guess}' is in the word."
     @output.puts "You have #{lives} remaining #{lives > 1 ? 'lives' : 'life'} left."
   end
 
-  def incorrect_guess(guess, lives)
+  def incorrect_guess_message(guess, lives)
     @output.puts "------------------------------------------------------------------------"
     @output.puts "The secret word does not include the letter '#{guess}'."
     @output.puts "You have #{lives} remaining #{lives > 1 ? 'lives' : 'life'} left." if lives > 0

@@ -12,26 +12,26 @@ class Hangman
 
   def start
     while game_in_progress?
-      @game_view.board_state(@secret_word.masked_word, @secret_word.guessed_letters)
+      @game_view.show_board_state(@secret_word.masked_word, @secret_word.guessed_letters)
       guess = @game_view.make_guess
 
       if @secret_word.repeated_guess?(guess)
-        @game_view.repeated_guess
+        @game_view.repeated_guess_message
         next
       end
 
-      if @secret_word.make_guess(guess)
-        @game_view.correct_guess(guess, @lives)
+      if @secret_word.save_guess(guess)
+        @game_view.correct_guess_message(guess, @lives)
       else
         @lives -= 1
-        @game_view.incorrect_guess(guess, @lives)
+        @game_view.incorrect_guess_message(guess, @lives)
       end
     end
 
     if @secret_word.guessed?
-      @game_view.won(@secret_word.reveal_word)
+      @game_view.won_message(@secret_word.reveal_word)
     else
-      @game_view.lost(@secret_word.reveal_word)
+      @game_view.lost_message(@secret_word.reveal_word)
     end
   end
 

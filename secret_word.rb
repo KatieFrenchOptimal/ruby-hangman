@@ -19,7 +19,7 @@ class SecretWord
     @board.join("") == @hidden_word
   end
 
-  def make_guess(guess)
+  def save_guess(guess)
     update_secret_characters(guess)
     @guessed_letters.push(guess)
     @hidden_word.include?(guess)
