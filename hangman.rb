@@ -1,88 +1,41 @@
 #!/usr/bin/env ruby
 
 require "./game_view"
+require "./secret_word"
 
 class Hangman
-  attr_reader :lives
-  attr_reader :secret_word
-  attr_reader :board
-  attr_reader :guessed_letters
-
   def initialize(input: $stdin, output: $stdout, secret_word: nil)
-    @gameview = Gameview.new(output)
-    @output = output
-    @input = input
+    @game_view = GameView.new(output, input)
     @lives = 9
-    @secret_word = secret_word || File.readlines("words.txt").sample.upcase.chop
-    @board = setup_board
-    @guessed_letters = []
-  end
-
-  def setup_board
-    board = ["_"] * secret_word.size
+    @secret_word = SecretWord.new(secret_word || File.readlines("words.txt").sample.chop)
   end
 
   def start
-    while lives > 0 && !won?
-      @output.puts board_state
-      guess = make_guess
+    while game_in_progress?
+      @game_view.board_state(@secret_word.masked_word, @secret_word.guessed_letters)
+      guess = @game_view.make_guess
 
-      unless valid_guess(guess)
-        @gameview.invalid_guess
-      else
-        save_guess(guess)
+      if @secret_word.repeated_guess?(guess)
+        @game_view.repeated_guess
+        next
       end
 
-      @gameview.past_guesses(guessed_letters)
+      if @secret_word.make_guess(guess)
+        @game_view.correct_guess(guess, @lives)
+      else
+        @lives -= 1
+        @game_view.incorrect_guess(guess, @lives)
+      end
     end
 
-    if won?
-      @gameview.won(secret_word)
+    if @secret_word.guessed?
+      @game_view.won(@secret_word.reveal_word)
     else
-      @gameview.lost(secret_word)
+      @game_view.lost(@secret_word.reveal_word)
     end
   end
 
   def game_in_progress?
-    lives > 0 && board.include?("_")
-  end
-
-  def won?
-    board.join("") == secret_word
-  end
-
-  def make_guess
-    @output.print "Guess a letter: "
-    @input.gets.chomp.upcase
-  end
-
-  def valid_guess(guess)
-    guess =~ /^[a-zA-Z]$/
-  end
-
-  def save_guess(guess)
-    if guessed_letters.include?(guess)
-      @gameview.repeated_guess
-    else
-      @guessed_letters.push(guess)
-      update_board(guess)
-    end
-  end
-
-  def board_state
-    @output.puts "Guess the hidden word: #{board.join(" ")}"
-  end
-
-  def update_board(guess)
-    if secret_word.include?(guess)
-      @gameview.correct_guess(guess, lives)
-
-      secret_word.chars.each_with_index do |character, index|
-        board[index] = character if character == guess
-      end
-    else
-      @lives -= 1
-      @gameview.incorrect_guess(guess, lives)
-    end
+    @lives > 0 && !@secret_word.guessed?
   end
 end

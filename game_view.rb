@@ -1,6 +1,29 @@
-class Gameview
-  def initialize(output)
+class GameView
+  def initialize(output, input)
     @output = output
+    @input = input
+  end
+
+  def make_guess
+    guess = nil
+
+    loop do
+      @output.print "Guess a letter: "
+      guess = @input.gets.chomp.upcase
+
+      if guess =~ /^[a-zA-Z]$/
+        break
+      end
+
+      invalid_guess
+    end
+
+    guess
+  end
+
+  def board_state(board, guessed_letters)
+    @output.puts "Guess the hidden word: #{board.map{ |char| char.nil? ? '_' : char }.join(" ")}"
+    @output.puts "Your guesses: '#{guessed_letters.join("', '")}'"
   end
 
   def won(secret_word)
