@@ -33,7 +33,7 @@ class SecretWord
 
   def update_secret_characters(guess)
     @hidden_word.chars.each_with_index do |character, index|
-      @board[index] = character if character == guess
+      @board[index] = character if character == guess.upcase
     end
   end
 end

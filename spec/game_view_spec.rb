@@ -4,7 +4,30 @@ describe GameView do
   let(:output) { StringIO.new }
   let(:game_view) { GameView.new(output, input: nil) }
 
-  describe "#won" do
+  describe "#show_board_state" do
+    it "shows the default board state" do
+      secret_word = "Hello"
+      board = [nil] * secret_word.size
+      guesses = []
+
+      game_view.show_board_state(board, guesses)
+
+      expect(output.string).to include "_ _ _ _ _"
+    end
+
+    it "shows the updated board state" do
+      secret_word = "Hello"
+
+      board = [nil, "E", nil, nil, "O"]
+      guesses = ["E", "O"]
+
+      game_view.show_board_state(board, guesses)
+
+      expect(output.string).to include "_ E _ _ O"
+    end
+  end
+
+  describe "#won_message" do
     it "displays win message" do
       input = "hello"
       game_view.won_message(input.upcase)
@@ -14,7 +37,7 @@ describe GameView do
     end
   end
 
-  describe "#lost" do
+  describe "#lost_message" do
     it "displays lost message" do
       input = "hello"
       game_view.lost_message(input.upcase)
@@ -24,7 +47,7 @@ describe GameView do
     end
   end
 
-  describe "#invalid_guess" do
+  describe "#invalid_guess_message" do
     it "displays invalid guess message" do
       game_view.invalid_guess_message
 
@@ -32,7 +55,7 @@ describe GameView do
     end
   end
 
-  describe "#repeated_guess" do
+  describe "#repeated_guess_message" do
     it "displays repeated guess message" do
       game_view.repeated_guess_message
 
@@ -40,7 +63,7 @@ describe GameView do
     end
   end
 
-  describe "#correct_guess" do
+  describe "#correct_guess_message" do
     it "displays correct guess message" do
       game_view.correct_guess_message("L", 9)
 
@@ -49,7 +72,7 @@ describe GameView do
     end
   end
 
-  describe "#incorrect_guess" do
+  describe "#incorrect_guess_message" do
     it "displays incorrect guess message" do
       game_view.incorrect_guess_message("B", 8)
 
