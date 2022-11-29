@@ -1,49 +1,36 @@
 require "./hangman"
 
 describe Hangman do
+  let (:hangman) { Hangman.new(secret_word: "Hello") }
+  let (:game_view) { instance_double("GameView") }
 
-  it "can be won" do
-    output = StringIO.new
-    input = build_input("eohl".chars)
-    secret_word = "Hello"
-
-    Hangman.new(output: output, input: input, secret_word: secret_word).start
-
-    expect(output.string).to include "Your guesses: 'E', 'O', 'H'"
-    expect(output.string).to include "Guess the hidden word: _ E _ _ O"
-    expect(output.string).to include "Correct guess. The letter 'L' is in the word"
-    expect(output.string).to include "You won."
-    expect(output.string).not_to include "You have 8 remaining lives left."
+  before do
+    allow(game_view).to receive(:make_guess)
+    allow(game_view).to receive(:show_board_state)
+    allow(game_view).to receive(:won_message)
+    allow(game_view).to receive(:lost_message)
+    allow(game_view).to receive(:invalid_guess_message)
+    allow(game_view).to receive(:repeated_guess_message)
+    allow(game_view).to receive(:correct_guess_message)
+    allow(game_view).to receive(:incorrect_guess_message)
+    allow(game_view).to receive(:past_guesses)
   end
 
-  it "can be lost" do
-    output = StringIO.new
-    input = build_input("xzvbnrqws".chars)
-    secret_word = "Hello"
+  it "can win a game" do
+    allow(GameView).to receive(:new).and_return(game_view)
+    allow(game_view).to receive(:make_guess).and_return("h", "e", "l", "o")
 
-    Hangman.new(output: output, input: input, secret_word: secret_word).start
+    expect(game_view).to receive(:won_message)
 
-    expect(output.string).to include "You have 1 remaining life left."
-    expect(output.string).to include "You lost."
-    expect(output.string).to include "Your guesses: 'X', 'Z', 'V', 'B', 'N', 'R', 'Q', 'W'"
-    expect(output.string).to include "The secret word does not include the letter 'W'."
-    expect(output.string).to include "The secret word was: HELLO."
+    hangman.start
   end
 
-  it "will not lose life for invalid input" do
-    output = StringIO.new
-    input = build_input("ll4eoh".chars)
-    secret_word = "Hello"
+  it "can lose a game" do
+    allow(GameView).to receive(:new).and_return(game_view)
+    allow(game_view).to receive(:make_guess).and_return("a", "b", "c", "d", "f", "g", "i", "j", "k")
 
-    Hangman.new(output: output, input: input, secret_word: secret_word).start
+    expect(game_view).to receive(:lost_message)
 
-    expect(output.string).to include "Input is invalid - please provide a letter."
-    expect(output.string).to include "You have already guessed this letter - try again."
-    expect(output.string).not_to include "You have 8 remaining lives left."
-
-  end
-
-  def build_input(*letters)
-    StringIO.new(letters.join("\n") + "\n")
+    hangman.start
   end
 end

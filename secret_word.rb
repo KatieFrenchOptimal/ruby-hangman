@@ -20,9 +20,9 @@ class SecretWord
   end
 
   def save_guess(guess)
-    update_secret_characters(guess)
-    @guessed_letters.push(guess)
-    @hidden_word.include?(guess)
+    update_secret_characters(guess.upcase)
+    @guessed_letters.push(guess.upcase)
+    @hidden_word.include?(guess.upcase)
   end
 
   def repeated_guess?(guess)
